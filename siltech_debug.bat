@@ -206,9 +206,9 @@ call :CHECK_COM
 echo.
 echo   Reading device info from %COMPORT%...
 echo.
-esptool.exe --port %COMPORT% --chip esp32 chip_id
+esptool.exe --port %COMPORT% --chip esp32 chip-id
 echo.
-esptool.exe --port %COMPORT% --chip esp32 flash_id
+esptool.exe --port %COMPORT% --chip esp32 flash-id
 echo.
 pause
 goto :MENU
