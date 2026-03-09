@@ -1,71 +1,77 @@
-# SilTech Debug Toolkit
-## Field Service Tool — Zero-Install, Windows 10/11
+SilTech Industries - Debug & Production Toolkit
+================================================
 
-Portable firmware flash + serial monitor for all SilTech IoT devices.
-Copy the entire folder to any Windows PC — no installation needed.
+Two tools in one package:
 
-## Quick Start
+1. siltech_debug.bat    - Field debugging (technicians)
+2. production_flash.bat - Factory floor flashing (workers)
 
-1. Plug in USB-TTL adapter (CH340/CP2102/FTDI)
-2. Double-click `siltech_debug.bat`
-3. Select device type → select action → done
 
-## Contents
+PRODUCTION FLASH TOOL (production_flash.bat)
+--------------------------------------------
+For factory workers flashing new devices off the assembly line.
 
-```
-SilTech_Debug/
-├── siltech_debug.bat    # Main menu — device selection + all tools
-├── monitor.bat          # Quick-launch serial monitor
-├── monitor.ps1          # PowerShell serial monitor (115200 baud)
-├── esptool.exe          # esptool v5 standalone (no Python needed)
-├── README.txt           # This file
-└── firmware/
-    ├── IO_Controller/   # GT01 10-channel cyclic controller
-    ├── BusLog_4G_v2/    # BusLog 4G v2 (2 DI, 2 DO)
-    ├── Tele_4G_AC/      # Tele 4G AC standard gateway
-    ├── BusLog_4G_Lite/  # BusLog 4G Lite (no GPIO)
-    └── BusLog_IO_UNI_v1/# BusLog IO UNI v1 (ESP32-S3, Ethernet)
-```
+How to use:
+  1. Double-click production_flash.bat
+  2. Select device type (e.g. BusLog_4G_v2)
+  3. Select flash mode (Full Flash for new devices)
+  4. Connect device via USB cable
+  5. Press ENTER to flash
+  6. Device flashes + auto-resets + monitor starts
+  7. Check serial output for errors
+  8. Press Q + Enter to stop monitor
+  9. Disconnect device, connect next one
+  10. Press ENTER to flash next device
+  11. Repeat!
 
-## Menu Options
+Logs saved to: logs\production_YYYY-MM-DD.log
 
-| Key | Action | Description |
-|-----|--------|-------------|
-| F | Flash App | Firmware only — keeps WiFi/config/SPIFFS |
-| A | Flash Full | Bootloader + partitions + app — ERASES config |
-| E | Erase | Wipe entire flash (for bricked devices) |
-| M | Monitor | Serial monitor (115200 baud) |
-| I | Info | Read chip ID, MAC, flash size |
-| Q | Quit | Exit |
 
-## Adding New Firmware
+DEBUG TOOL (siltech_debug.bat)
+------------------------------
+For field technicians debugging deployed devices.
 
-1. Create folder: `firmware\<DeviceName>\`
-2. Copy `firmware.bin` (required)
-3. Optionally add `bootloader.bin` + `partitions.bin` (for full flash)
-4. Device will auto-appear in the menu
+Features:
+  F - Flash App Only (keeps config)
+  A - Full Flash (bootloader + partitions + app)
+  E - Erase Flash (nuclear option)
+  M - Serial Monitor
+  I - Device Info (chip ID, MAC, flash)
 
-## COM Port Auto-Detection
+Logs saved to: logs\debug_YYYY-MM-DD.log
 
-Automatically finds USB-TTL adapters:
-- CH340 / CH341
-- CP2102 / CP2104
-- FTDI
-- Silicon Labs
 
-If not detected, check Device Manager for the COM port number.
+REQUIREMENTS
+------------
+- Windows 10/11
+- CH340 or CP2102 USB-to-serial adapter
+- USB driver installed (CH340: wch-ic.com/downloads)
+- No other software needed (esptool.exe included)
 
-## Notes
 
-- Flash baud: 460800 (fast, reliable)
-- Monitor baud: 115200 (standard SilTech serial)
-- BusLog_IO_UNI_v1 uses ESP32-S3 — esptool auto-detects chip
-- Full flash uses `--flash-mode dio --flash-size 4MB` (ESP32 default)
-- Monitor auto-launches after successful flash
+SUPPORTED DEVICES
+-----------------
+- Tele_4G_AC
+- BusLog_4G_v2
+- BusLog_4G_Lite
+- BusLog4G_Bat_A / B / C
+- BusLog4G_Bat_IO
+- BusLog_IO_UNI_v1
+- IO_Controller
 
-## Troubleshooting
 
-- **"No USB-TTL adapter found"** — Check USB cable / Device Manager
-- **Flash fails** — Try erase first, then full flash
-- **Device in boot loop** — Erase + full flash
-- **Monitor garbled** — Check baud rate (should be 115200)
+TROUBLESHOOTING
+---------------
+"No USB adapter detected"
+  → Install CH340 driver from wch-ic.com/downloads
+  → Try a different USB port
+  → Check Device Manager for COM port
+
+"Flash failed"
+  → Hold BOOT button on device while starting flash
+  → Check TX/RX/GND connections
+  → Try lower baud: edit .bat file, change 460800 to 115200
+
+"Monitor shows garbage"
+  → Baud rate mismatch (should be 115200)
+  → Check TX/RX not swapped
