@@ -53,16 +53,17 @@ echo.
 
 set /p CHOICE="   Select: "
 
+:: Strip whitespace from input
+set "CHOICE=%CHOICE: =%"
+
 if /i "%CHOICE%"=="Q" goto :EOF
+if /i "%CHOICE%"=="E" goto :ERASE
 if /i "%CHOICE%"=="M" goto :MONITOR
 if /i "%CHOICE%"=="I" goto :DEVICEINFO
-if /i "%CHOICE%"=="E" goto :ERASE
-
-:: For flash operations, need device selection
 if /i "%CHOICE%"=="F" goto :SELECT_DEVICE_APP
 if /i "%CHOICE%"=="A" goto :SELECT_DEVICE_FULL
 
-echo   [ERROR] Invalid choice.
+echo   [ERROR] Invalid choice: "%CHOICE%"
 timeout /t 2 >nul
 goto :MENU
 
