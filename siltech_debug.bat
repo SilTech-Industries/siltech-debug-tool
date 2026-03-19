@@ -149,12 +149,36 @@ if not exist "firmware\!DEVNAME!\bootloader.bin" (
     esptool.exe --port %COMPORT% --baud 460800 --chip esp32 ^
       write-flash 0x10000 firmware\!DEVNAME!\firmware.bin
 ) else (
+    :: Detect flash size: 4MB devices vs 16MB devices
+    set FLASH_SIZE=4MB
+    set SPIFFS_OFFSET=0x290000
+    if /i "!DEVNAME!"=="BusLog_4G_v2"      set FLASH_SIZE=16MB& set SPIFFS_OFFSET=0x820000
+    if /i "!DEVNAME!"=="BusLog_4G_Lite"     set FLASH_SIZE=16MB& set SPIFFS_OFFSET=0x820000
+    if /i "!DEVNAME!"=="BusLog4G_Bat_C"     set FLASH_SIZE=16MB& set SPIFFS_OFFSET=0x820000
+    if /i "!DEVNAME!"=="BusLog4G_Bat_IO"    set FLASH_SIZE=16MB& set SPIFFS_OFFSET=0x820000
+    if /i "!DEVNAME!"=="BusLog_IO_UNI_v1"   set FLASH_SIZE=16MB& set SPIFFS_OFFSET=0x820000
+
+    echo   Flash size: !FLASH_SIZE! ^| SPIFFS offset: !SPIFFS_OFFSET!
+    echo.
     pause
-    esptool.exe --port %COMPORT% --baud 460800 --chip esp32 ^
-      write-flash --flash-mode dio --flash-size 4MB ^
-      0x1000  firmware\!DEVNAME!\bootloader.bin ^
-      0x8000  firmware\!DEVNAME!\partitions.bin ^
-      0x10000 firmware\!DEVNAME!\firmware.bin
+
+    :: Check if SPIFFS image exists
+    if exist "firmware\!DEVNAME!\spiffs.bin" (
+        echo   Flashing: bootloader + partitions + app + SPIFFS
+        esptool.exe --port %COMPORT% --baud 460800 --chip esp32 ^
+          write-flash --flash-mode dio --flash-size !FLASH_SIZE! ^
+          0x1000  firmware\!DEVNAME!\bootloader.bin ^
+          0x8000  firmware\!DEVNAME!\partitions.bin ^
+          0x10000 firmware\!DEVNAME!\firmware.bin ^
+          !SPIFFS_OFFSET! firmware\!DEVNAME!\spiffs.bin
+    ) else (
+        echo   Flashing: bootloader + partitions + app (no SPIFFS)
+        esptool.exe --port %COMPORT% --baud 460800 --chip esp32 ^
+          write-flash --flash-mode dio --flash-size !FLASH_SIZE! ^
+          0x1000  firmware\!DEVNAME!\bootloader.bin ^
+          0x8000  firmware\!DEVNAME!\partitions.bin ^
+          0x10000 firmware\!DEVNAME!\firmware.bin
+    )
 )
 
 echo.
